@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>User Form</title>
+</head>
+<body>
+<h2>
+    <span th:if="${user.id == null || user.id == 0}">Add User</span>
+    <span th:if="${user.id != null && user.id != 0}">Update User</span>
+</h2>
+
+<form th:action="@{/admin/saveUser}" th:object="${user}" method="POST">
+    <input type="hidden" th:field="*{id}" />
+
+    <div>
+        <label for="username">Username:</label>
+        <input type="text" id="username" th:field="*{username}" required="true" />
+    </div>
+    <br/>
+
+    <div>
+        <label for="password">Password: (Leave empty to keep current password for update)</label>
+        <input type="password" id="password" th:field="*{password}"
+               th:required="${user.id == null || user.id == 0}"/>
+    </div>
+    <br/>
+
+    <div>
+        <label for="name">Name:</label>
+        <input type="text" id="name" th:field="*{name}" />
+    </div>
+    <br/>
+
+    <div>
+        <label for="email">Email:</label>
+        <input type="email" id="email" th:field="*{email}" required="true" />
+    </div>
+    <br/>
+
+    <div>
+        <label for="age">Age:</label>
+        <input type="number" id="age" th:field="*{age}" />
+    </div>
+    <br/>
+
+    <div>
+        <label>Roles:</label><br/>
+        <div th:each="role : ${allRoles}">
+            <input type="checkbox"
+                   th:id="${'role_' + role.id}"
+                   th:name="selectedRoles"
+                   th:value="${role.id}"
+                   th:checked="${user.roles != null && user.roles.contains(role)}" />
+            <label th:for="${'role_' + role.id}" th:text="${role.name}"></label><br/>
+        </div>
+    </div>
+    <br/>
+
+    <input type="submit" value="Save User" />
+    <a th:href="@{/admin/users}">Cancel</a>
+</form>
+
+</body>
+</html>
