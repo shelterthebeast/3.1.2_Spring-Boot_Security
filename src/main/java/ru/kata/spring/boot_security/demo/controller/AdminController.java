@@ -3,22 +3,20 @@ package ru.kata.spring.boot_security.demo.controller;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.UserService;
 import ru.kata.spring.boot_security.demo.dao.RoleDAO;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Controller
 public class AdminController {
@@ -32,6 +30,7 @@ public class AdminController {
     }
 
     @GetMapping("/admin")
+    @Transactional(readOnly = true)
     public String adminPage(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -46,6 +45,7 @@ public class AdminController {
     }
 
     @GetMapping("/admin/users")
+    @Transactional(readOnly = true)
     public String listUsers(Model model) {
         List<User> users = userService.getAllUsers();
         model.addAttribute("users", users);
@@ -67,23 +67,8 @@ public class AdminController {
 
     @PostMapping("/admin/saveUser")
     public String saveUser(@ModelAttribute("user") User user,
-                           @RequestParam(value = "selectedRoles", required = false) List<Long> selectedRolesIds) {
-
-        Set<Role> roles = new HashSet<>();
-        if (selectedRolesIds != null) {
-            roles = selectedRolesIds.stream()
-                    .map(roleDAO::findById)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .collect(Collectors.toSet());
-        }
-        user.setRoles(roles);
-
-        if (user.getId() == null || user.getId() == 0) {
-            userService.saveUser(user);
-        } else {
-            userService.updateUser(user);
-        }
+                           @RequestParam(value = "selectedRoles", required = false) Set<Long> selectedRolesIds) {
+        userService.saveOrUpdateUser(user, selectedRolesIds);
         return "redirect:/admin/users";
     }
 

@@ -32,7 +32,7 @@ public class User implements UserDetails {
     @Column(name = "age")
     private int age;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -60,7 +60,6 @@ public class User implements UserDetails {
         this.age = age;
         this.roles = roles;
     }
-
 
     public Long getId() {return id;}
 
